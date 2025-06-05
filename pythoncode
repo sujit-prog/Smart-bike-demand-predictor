@@ -1,0 +1,37 @@
+import requests
+
+# Step 1: Set your IBM Cloud API Key
+API_KEY = "your_real_ibm_api_key"
+
+# Step 2: Get the access token
+token_response = requests.post(
+    'https://iam.cloud.ibm.com/identity/token',
+    data={"apikey": API_KEY, "grant_type": 'urn:ibm:params:oauth:grant-type:apikey'}
+)
+mltoken = token_response.json()["access_token"]
+
+# Step 3: Set the authorization header
+header = {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + mltoken}
+
+# Step 4: Define input fields and values to score
+array_of_input_fields = ["temperature", "humidity", "windspeed", "hour", "weekday", "holiday"]
+array_of_values_to_be_scored = [22.5, 56, 12.3, 8, 2, 0]  # Example values
+another_array_of_values_to_be_scored = [30.0, 70, 18.2, 17, 6, 1]  # Another sample
+
+payload_scoring = {
+    "input_data": [{
+        "fields": array_of_input_fields,
+        "values": [array_of_values_to_be_scored, another_array_of_values_to_be_scored]
+    }]
+}
+
+# Step 5: Make the scoring request
+response_scoring = requests.post(
+    'https://<your-region>.ml.cloud.ibm.com/ml/v4/deployments/<your-deployment-id>/predictions?version=2021-05-01',
+    json=payload_scoring,
+    headers=header
+)
+
+# Step 6: Print the prediction results
+print("Scoring response:")
+print(response_scoring.json())
